@@ -1,0 +1,97 @@
+{
+  "name": "kakehashi-vscode",
+  "displayName": "kakehashi",
+  "description": "VSCode client for the kakehashi language server",
+  "version": "0.0.1",
+  "publisher": "atusy",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:kakehashi.toml",
+    "onCommand:kakehashi.configureDocumentSelector",
+    "onCommand:kakehashi.restartServer"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "kakehashi.configureDocumentSelector",
+        "title": "kakehashi: Configure Document Selector"
+      },
+      {
+        "command": "kakehashi.restartServer",
+        "title": "kakehashi: Restart Server"
+      }
+    ],
+    "configuration": {
+      "title": "kakehashi",
+      "properties": {
+        "kakehashi.command": {
+          "type": "array",
+          "default": [
+            "kakehashi"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Argv array used to spawn the kakehashi language server. The first element is the executable; the rest are arguments."
+        },
+        "kakehashi.documentSelector": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "scheme": {
+                    "type": "string"
+                  },
+                  "pattern": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Document selectors that determine which documents kakehashi attaches to. If empty, the language client is not started."
+        },
+        "kakehashi.initializationOptions": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "description": "Arbitrary initializationOptions passed to the language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "vscode:prepublish": "npm run typecheck && node esbuild.js --production"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.82.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  }
+}

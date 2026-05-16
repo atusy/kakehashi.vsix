@@ -1,0 +1,8 @@
+.gitignore
+.vscode/
+src/
+out/
+tsconfig.json
+esbuild.js
+**/*.map
+__ignored/
