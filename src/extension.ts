@@ -8,9 +8,17 @@ import {
 
 const FIRST_RUN_KEY = "kakehashi.firstRunNoticeShown";
 
+type DocumentSelectorPattern = {
+  language?: string;
+  scheme?: string;
+  pattern?: string;
+};
+
+type DocumentSelectorEntry = string | DocumentSelectorPattern;
+
 interface KakehashiConfig {
   command: string[];
-  documentSelector: unknown[];
+  documentSelector: DocumentSelectorEntry[];
   initializationOptions: object | null;
 }
 
@@ -64,12 +72,6 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
   }
 
   const selector = normalizeDocumentSelector(config.documentSelector);
-  if (selector.length === 0) {
-    void vscode.window.showWarningMessage(
-      "kakehashi.documentSelector contained no valid entries.",
-    );
-    return;
-  }
 
   const [exe, ...args] = config.command;
   const serverOptions: ServerOptions = { command: exe, args };
@@ -103,42 +105,52 @@ async function restartClient(
 
 function getConfiguration(): KakehashiConfig {
   const cfg = vscode.workspace.getConfiguration("kakehashi");
+  const rawSelector = cfg.get<unknown[]>("documentSelector") ?? [];
+  const documentSelector: DocumentSelectorEntry[] = [];
+  for (const item of rawSelector) {
+    if (isDocumentSelectorEntry(item)) {
+      documentSelector.push(item);
+    } else {
+      warnInvalidSelectorEntry(item);
+    }
+  }
   return {
     command: cfg.get<string[]>("command") ?? ["kakehashi"],
-    documentSelector: cfg.get<unknown[]>("documentSelector") ?? [],
+    documentSelector,
     initializationOptions:
       cfg.get<object | null>("initializationOptions") ?? null,
   };
 }
 
-function normalizeDocumentSelector(input: unknown[]): DocumentFilter[] {
-  const out: DocumentFilter[] = [];
-  for (const item of input) {
-    if (typeof item === "string") {
-      out.push({ language: item });
-      continue;
-    }
-    if (item && typeof item === "object" && !Array.isArray(item)) {
-      const obj = item as Record<string, unknown>;
-      const filter: {
-        language?: string;
-        scheme?: string;
-        pattern?: string;
-      } = {};
-      if (typeof obj.language === "string") filter.language = obj.language;
-      if (typeof obj.scheme === "string") filter.scheme = obj.scheme;
-      if (typeof obj.pattern === "string") filter.pattern = obj.pattern;
-      if (Object.keys(filter).length > 0) {
-        out.push(filter as DocumentFilter);
-        continue;
-      }
-    }
-    console.warn("kakehashi: ignoring invalid documentSelector entry:", item);
-    void vscode.window.showWarningMessage(
-      `kakehashi: ignoring invalid documentSelector entry: ${JSON.stringify(item)}`,
-    );
+function isDocumentSelectorEntry(v: unknown): v is DocumentSelectorEntry {
+  if (typeof v === "string") return true;
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  const obj = v as Record<string, unknown>;
+  let anyPresent = false;
+  for (const key of ["language", "scheme", "pattern"] as const) {
+    const val = obj[key];
+    if (val === undefined) continue;
+    if (typeof val !== "string") return false;
+    anyPresent = true;
   }
-  return out;
+  return anyPresent;
+}
+
+function warnInvalidSelectorEntry(item: unknown): void {
+  console.warn("kakehashi: ignoring invalid documentSelector entry:", item);
+  void vscode.window.showWarningMessage(
+    `kakehashi: ignoring invalid documentSelector entry: ${JSON.stringify(item)}`,
+  );
+}
+
+function normalizeDocumentSelector(
+  entries: DocumentSelectorEntry[],
+): DocumentFilter[] {
+  return entries.map((entry) =>
+    typeof entry === "string"
+      ? ({ language: entry } as DocumentFilter)
+      : (entry as DocumentFilter),
+  );
 }
 
 async function maybeShowFirstRunNotice(
