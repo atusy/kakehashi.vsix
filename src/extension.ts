@@ -16,10 +16,20 @@ type DocumentSelectorPattern = {
 
 type DocumentSelectorEntry = string | DocumentSelectorPattern;
 
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | Json[]
+  | { [key: string]: Json };
+
+type JsonObject = { [key: string]: Json };
+
 interface KakehashiConfig {
   command: string[];
   documentSelector: DocumentSelectorEntry[];
-  initializationOptions: object | null;
+  initializationOptions: JsonObject | null;
 }
 
 let client: LanguageClient | undefined;
@@ -113,6 +123,7 @@ async function restartClient(
 function getConfiguration(): KakehashiConfig {
   const cfg = vscode.workspace.getConfiguration("kakehashi");
   const rawSelector = cfg.get<unknown[]>("documentSelector") ?? [];
+  const rawInitializationOptions = cfg.get<unknown>("initializationOptions");
   const documentSelector: DocumentSelectorEntry[] = [];
   for (const item of rawSelector) {
     if (isDocumentSelectorEntry(item)) {
@@ -124,9 +135,30 @@ function getConfiguration(): KakehashiConfig {
   return {
     command: cfg.get<string[]>("command") ?? ["kakehashi"],
     documentSelector,
-    initializationOptions:
-      cfg.get<object | null>("initializationOptions") ?? null,
+    initializationOptions: isJsonObject(rawInitializationOptions)
+      ? rawInitializationOptions
+      : null,
   };
+}
+
+function isJson(v: unknown): v is Json {
+  if (
+    v === null ||
+    typeof v === "string" ||
+    typeof v === "number" ||
+    typeof v === "boolean"
+  ) {
+    return true;
+  }
+  if (Array.isArray(v)) {
+    return v.every(isJson);
+  }
+  return isJsonObject(v);
+}
+
+function isJsonObject(v: unknown): v is JsonObject {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  return Object.values(v).every(isJson);
 }
 
 function isDocumentSelectorEntry(v: unknown): v is DocumentSelectorEntry {
