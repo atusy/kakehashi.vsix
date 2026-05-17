@@ -4,6 +4,7 @@
   "description": "VSCode client for the kakehashi language server",
   "version": "0.0.1",
   "publisher": "atusy",
+  "repository": "https://github.com/atusy/kakehashi-vscode",
   "license": "MIT",
   "engines": {
     "vscode": "^1.82.0"
