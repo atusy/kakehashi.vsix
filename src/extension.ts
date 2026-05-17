@@ -29,6 +29,7 @@ type JsonObject = { [key: string]: Json };
 interface KakehashiConfig {
   command: string[];
   documentSelector: DocumentSelectorEntry[];
+  env: Record<string, string> | null;
   initializationOptions: JsonObject | null;
 }
 
@@ -53,6 +54,7 @@ export async function activate(
       if (
         e.affectsConfiguration("kakehashi.command") ||
         e.affectsConfiguration("kakehashi.documentSelector") ||
+        e.affectsConfiguration("kakehashi.env") ||
         e.affectsConfiguration("kakehashi.initializationOptions")
       ) {
         void restartClient(context);
@@ -90,7 +92,11 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
   const selector = normalizeDocumentSelector(config.documentSelector);
 
   const [exe, ...args] = config.command;
-  const serverOptions: ServerOptions = { command: exe, args };
+  const serverOptions: ServerOptions = {
+    command: exe,
+    args,
+    options: config.env ? { env: { ...process.env, ...config.env } } : undefined,
+  };
   const clientOptions: LanguageClientOptions = {
     documentSelector: selector,
     initializationOptions: config.initializationOptions,
@@ -123,6 +129,7 @@ async function restartClient(
 function getConfiguration(): KakehashiConfig {
   const cfg = vscode.workspace.getConfiguration("kakehashi");
   const rawSelector = cfg.get<unknown[]>("documentSelector") ?? [];
+  const rawEnv = cfg.get<unknown>("env");
   const rawInitializationOptions = cfg.get<unknown>("initializationOptions");
   const documentSelector: DocumentSelectorEntry[] = [];
   for (const item of rawSelector) {
@@ -135,10 +142,16 @@ function getConfiguration(): KakehashiConfig {
   return {
     command: cfg.get<string[]>("command") ?? ["kakehashi"],
     documentSelector,
+    env: isStringRecord(rawEnv) ? rawEnv : null,
     initializationOptions: isJsonObject(rawInitializationOptions)
       ? rawInitializationOptions
       : null,
   };
+}
+
+function isStringRecord(v: unknown): v is Record<string, string> {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  return Object.values(v).every((value) => typeof value === "string");
 }
 
 function isJson(v: unknown): v is Json {

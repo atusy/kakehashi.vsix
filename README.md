@@ -14,6 +14,7 @@ This extension does **not** attach to any document by default. Configure
     "markdown",
     { "scheme": "file", "language": "rust" }
   ],
+  "kakehashi.env": null,
   "kakehashi.initializationOptions": null
 }
 ```
@@ -24,6 +25,7 @@ This extension does **not** attach to any document by default. Configure
 |---|---|---|---|
 | `kakehashi.command` | `string[]` | `["kakehashi"]` | Argv used to spawn the server. First element is the executable; the rest are arguments. |
 | `kakehashi.documentSelector` | `(string \| object)[]` | `[]` | Documents to attach to. Each entry is either a language id string or a `{ language?, scheme?, pattern? }` object. Empty disables the client. |
+| `kakehashi.env` | `Record<string, string> \| null` | `null` | Environment variables merged onto the extension process environment when spawning the server. |
 | `kakehashi.initializationOptions` | `object \| null` | `null` | Passed verbatim as LSP `initializationOptions`. |
 
 Changing any of these settings restarts the language client automatically.

@@ -68,6 +68,17 @@
           },
           "description": "Document selectors that determine which documents kakehashi attaches to. If empty, the language client is not started."
         },
+        "kakehashi.env": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables applied when spawning the kakehashi language server."
+        },
         "kakehashi.initializationOptions": {
           "type": [
             "object",
