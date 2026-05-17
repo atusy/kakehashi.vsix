@@ -50,7 +50,13 @@ export async function activate(
     }),
   );
 
-  await startClient(context);
+  try {
+    await startClient(context);
+  } catch (error) {
+    void vscode.window.showErrorMessage(
+      `Failed to start kakehashi: ${formatError(error)}`,
+    );
+  }
 }
 
 export async function deactivate(): Promise<void> {
@@ -151,6 +157,10 @@ function normalizeDocumentSelector(
       ? ({ language: entry } as DocumentFilter)
       : (entry as DocumentFilter),
   );
+}
+
+function formatError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function maybeShowFirstRunNotice(
