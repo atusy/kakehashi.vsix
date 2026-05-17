@@ -86,13 +86,14 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
     initializationOptions: config.initializationOptions,
   };
 
-  client = new LanguageClient(
+  const nextClient = new LanguageClient(
     "kakehashi",
     "kakehashi",
     serverOptions,
     clientOptions,
   );
-  await client.start();
+  await nextClient.start();
+  client = nextClient;
 }
 
 async function stopClient(): Promise<void> {
