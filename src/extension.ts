@@ -4,6 +4,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
   DocumentFilter,
+  Trace,
 } from "vscode-languageclient/node";
 
 const FIRST_RUN_KEY = "kakehashi.firstRunNoticeShown";
@@ -25,12 +26,14 @@ type Json =
   | { [key: string]: Json };
 
 type JsonObject = { [key: string]: Json };
+type TraceServerValue = "off" | "messages" | "verbose";
 
 interface KakehashiConfig {
   command: string[];
   documentSelector: DocumentSelectorEntry[];
   env: Record<string, string> | null;
   initializationOptions: JsonObject | null;
+  traceServer: TraceServerValue;
 }
 
 let client: LanguageClient | undefined;
@@ -55,7 +58,8 @@ export async function activate(
         e.affectsConfiguration("kakehashi.command") ||
         e.affectsConfiguration("kakehashi.documentSelector") ||
         e.affectsConfiguration("kakehashi.env") ||
-        e.affectsConfiguration("kakehashi.initializationOptions")
+        e.affectsConfiguration("kakehashi.initializationOptions") ||
+        e.affectsConfiguration("kakehashi.trace.server")
       ) {
         void restartClient(context);
       }
@@ -109,6 +113,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
     clientOptions,
   );
   await nextClient.start();
+  await nextClient.setTrace(getTrace(config.traceServer));
   client = nextClient;
 }
 
@@ -131,6 +136,7 @@ function getConfiguration(): KakehashiConfig {
   const rawSelector = cfg.get<unknown[]>("documentSelector") ?? [];
   const rawEnv = cfg.get<unknown>("env");
   const rawInitializationOptions = cfg.get<unknown>("initializationOptions");
+  const rawTraceServer = cfg.get<unknown>("trace.server");
   const documentSelector: DocumentSelectorEntry[] = [];
   for (const item of rawSelector) {
     if (isDocumentSelectorEntry(item)) {
@@ -146,7 +152,24 @@ function getConfiguration(): KakehashiConfig {
     initializationOptions: isJsonObject(rawInitializationOptions)
       ? rawInitializationOptions
       : null,
+    traceServer: isTraceServerValue(rawTraceServer) ? rawTraceServer : "off",
   };
+}
+
+function isTraceServerValue(v: unknown): v is TraceServerValue {
+  return v === "off" || v === "messages" || v === "verbose";
+}
+
+function getTrace(value: TraceServerValue): Trace {
+  switch (value) {
+    case "messages":
+      return Trace.Messages;
+    case "verbose":
+      return Trace.Verbose;
+    case "off":
+    default:
+      return Trace.Off;
+  }
 }
 
 function isStringRecord(v: unknown): v is Record<string, string> {

@@ -86,6 +86,16 @@
           ],
           "default": null,
           "description": "Arbitrary initializationOptions passed to the language server."
+        },
+        "kakehashi.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "markdownDescription": "Controls LSP message tracing for the kakehashi language server. `messages` traces requests and notifications, `verbose` includes full payload details."
         }
       }
     }

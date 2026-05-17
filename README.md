@@ -15,7 +15,8 @@ This extension does **not** attach to any document by default. Configure
     { "scheme": "file", "language": "rust" }
   ],
   "kakehashi.env": null,
-  "kakehashi.initializationOptions": null
+  "kakehashi.initializationOptions": null,
+  "kakehashi.trace.server": "off"
 }
 ```
 
@@ -27,6 +28,7 @@ This extension does **not** attach to any document by default. Configure
 | `kakehashi.documentSelector` | `(string \| object)[]` | `[]` | Documents to attach to. Each entry is either a language id string or a `{ language?, scheme?, pattern? }` object. Empty disables the client. |
 | `kakehashi.env` | `Record<string, string> \| null` | `null` | Environment variables merged onto the extension process environment when spawning the server. |
 | `kakehashi.initializationOptions` | `object \| null` | `null` | Passed verbatim as LSP `initializationOptions`. |
+| `kakehashi.trace.server` | `"off" \| "messages" \| "verbose"` | `"off"` | Controls LSP message tracing for the language server. |
 
 Changing any of these settings restarts the language client automatically.
 
