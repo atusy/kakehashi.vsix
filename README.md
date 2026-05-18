@@ -5,18 +5,37 @@ VSCode client for the [kakehashi](https://github.com/atusy/kakehashi) language s
 This extension does **not** attach to any document by default. Configure
 `kakehashi.documentSelector` to tell the extension which documents to attach to.
 
-## Minimal configuration
+## Example configuration (settings.json)
 
 ```json
 {
   "kakehashi.command": ["kakehashi"],
+  "[markdown]": {
+    "editor.quickSuggestions": {
+      "other": "on",
+    },
+  },
   "kakehashi.documentSelector": [
     "markdown",
+    "quarto",
+    "rmd"
   ],
   "kakehashi.env": null,
   "kakehashi.initializationOptions": null,
   "kakehashi.trace.server": "off"
 }
+```
+
+To work on Quarto and R Markdown on VSCode, you should also install following extensions respectively:
+
+- [quarto.quarto](https://marketplace.visualstudio.com/items?itemName=quarto.quarto)
+- [REditorSupport.r](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r)
+
+Note that Positron does not support [REditorSupport.r](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r).
+Instead, add a folowing entry to your `settings.json` .
+
+```json
+"files.associations": { "*.Rmd": "markdown" }
 ```
 
 ## Settings
