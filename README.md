@@ -12,7 +12,6 @@ This extension does **not** attach to any document by default. Configure
   "kakehashi.command": ["kakehashi"],
   "kakehashi.documentSelector": [
     "markdown",
-    { "scheme": "file", "language": "rust" }
   ],
   "kakehashi.env": null,
   "kakehashi.initializationOptions": null,
