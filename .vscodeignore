@@ -1,8 +1,11 @@
-.gitignore
-.vscode/
-src/
-out/
-tsconfig.json
-esbuild.js
 **/*.map
+.gitignore
+.vscode
+.vscode/
 __ignored/
+esbuild.js
+node_modules
+out/
+src/
+tsconfig.json
+webpack.config.js
