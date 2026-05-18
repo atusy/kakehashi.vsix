@@ -57,7 +57,7 @@ Changing any of these settings restarts the language client automatically.
 
 ## Requirements
 
-- VSCode `>= 1.82.0`
+- VSCode `>= 1.100.0`
 - The `kakehashi` binary on `PATH` (or set `kakehashi.command` to an absolute path)
 
 ## License
